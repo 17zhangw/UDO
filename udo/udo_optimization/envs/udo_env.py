@@ -26,12 +26,12 @@ import math
 import random
 import time
 
-import gym
+import gymnasium
 import numpy as np
-from gym import spaces
+from gymnasium import spaces
 
 
-class UDOEnv(gym.Env):
+class UDOEnv(gymnasium.Env):
     """the environment of DBMS optimizer"""
 
     def __init__(self, driver, queries, candidate_indices, config):
@@ -347,7 +347,7 @@ class UDOEnv(gym.Env):
         else:
             return next_state, reward, False, {}
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         """reset the state"""
         if self.current_state is not None:
             state = self.current_state
@@ -362,7 +362,7 @@ class UDOEnv(gym.Env):
             # self.driver.change_system_parameter(np.zeros(self.parameter_candidate_num, dtype=int))
         self.current_state = np.concatenate(
             [np.zeros(self.index_candidate_num, dtype=int), np.zeros(self.parameter_candidate_num, dtype=int)])
-        return self.current_state
+        return self.current_state, {}
 
     def print_state_summary(self, state):
         index_state = state[:self.index_candidate_num]

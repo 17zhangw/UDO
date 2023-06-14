@@ -24,9 +24,8 @@
 import logging
 import time
 
-import psycopg2
-from psycopg2._psycopg import InternalError
-from psycopg2._psycopg import QueryCanceledError
+import psycopg
+from psycopg.errors import InternalError, QueryCanceled
 
 from .abstractdriver import *
 
@@ -38,8 +37,7 @@ class PostgresDriver(AbstractDriver):
 
     def connect(self):
         """connect to a database"""
-        self.conn = psycopg2.connect("dbname='%s' user='%s'" % (self.config["db"], self.config["user"]))
-        self.conn.autocommit = True
+        self.conn = psycopg.connect("host=localhost port=5432 dbname='%s' user='%s'" % (self.config["db"], self.config["user"]), autocommit=True, prepare_threshold=None)
         self.cursor = self.conn.cursor()
         self.index_creation_format = "CREATE INDEX %s ON %s (%s);"
         self.index_drop_format = "drop index %s;"
@@ -76,7 +74,7 @@ class PostgresDriver(AbstractDriver):
                 self.cursor.execute(query_sql)
                 finish_time = time.time()
                 duration = finish_time - start_time
-            except QueryCanceledError:
+            except QueryCanceled:
                 duration = current_timeout
             except InternalError:
                 # error to run the query, set duration to a large number
@@ -91,6 +89,7 @@ class PostgresDriver(AbstractDriver):
 
     def run_queries_with_total_timeout(self, query_list, timeout):
         """run queries with a timeout"""
+        assert False
         run_time = []
         current_timeout = timeout
         total_runtime = 0

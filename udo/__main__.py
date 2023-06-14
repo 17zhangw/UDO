@@ -31,11 +31,7 @@ import sys
 
 import numpy as np
 
-from udo.agent.ddpg_agent import run_ddpg_agent
-from udo.agent.sarsa_agent import run_sarsa_agent
 from udo.agent.udo_agent import run_udo_agent
-from udo.agent.udo_simplifed_agent import run_simplifed_udo_agent
-from udo.drivers.mysqldriver import MysqlDriver
 from udo.drivers.postgresdriver import PostgresDriver
 
 if __name__ == "__main__":
@@ -159,9 +155,7 @@ if __name__ == "__main__":
 
     # create a dbms driver
     driver = None
-    if args['system'] == "mysql":
-        driver = MysqlDriver(dbms_conf, sys_params)
-    elif args['system'] == "postgres":
+    if args['system'] == "postgres":
         driver = PostgresDriver(dbms_conf, sys_params)
 
     # obtain index cardinality information
@@ -211,14 +205,3 @@ if __name__ == "__main__":
         tuning_config['rl_update'] = args['rl_update']
         tuning_config['rl_select'] = args['rl_select']
         run_udo_agent(driver=driver, queries=queries, candidate_indices=candidate_indices, tuning_config=tuning_config)
-    elif args['agent'] == 'udo-s':
-        # run simplified udo
-        run_simplifed_udo_agent(driver=driver, queries=queries, candidate_indices=candidate_indices,
-                                tuning_config=tuning_config)
-    elif args['agent'] == 'ddpg':
-        # run ddpg deep rl
-        run_ddpg_agent(driver=driver, queries=queries, candidate_indices=candidate_indices, tuning_config=tuning_config)
-    elif args['agent'] == 'sarsa':
-        # run sarsa deep rl
-        run_sarsa_agent(driver=driver, queries=queries, candidate_indices=candidate_indices,
-                        tuning_config=tuning_config)

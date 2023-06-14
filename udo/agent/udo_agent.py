@@ -26,11 +26,12 @@ import math
 import random
 import time
 
-import gym
+import gymnasium as gym
 
 from udo.mcts.mcts_node import SpaceType
 from udo.mcts.uct_node import uct_node
 from udo.optimizer import order_optimizer
+from udo.udo_optimization.envs.udo_env import UDOEnv
 
 
 def run_udo_agent(driver, queries, candidate_indices, tuning_config):
