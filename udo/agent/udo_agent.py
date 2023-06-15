@@ -165,6 +165,7 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
                 if estimate_workload_time < best_simulation_time:
                     best_simulation_time = estimate_workload_time
                     best_configs = {"heavy": selected_heavy_action_frozen, "light": selected_light_actions}
+                    logging.info(f"new_best_config {best_configs}")
 
                 current_time = time.time()
                 logging.debug(f"current global time: {(current_time - start_time)}")
