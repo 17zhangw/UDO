@@ -67,6 +67,13 @@ class PostgresDriver(AbstractDriver):
         run_time = []
         for query_sql, current_timeout in zip(query_list, timeout):
             try:
+                # Run the warmup query.
+                self.cursor.execute("set statement_timeout = %d" % (current_timeout * 1000))
+                self.cursor.execute(query_sql)
+            except:
+                self.cursor.execute("drop view if exists revenue0_PID;")
+
+            try:
                 # logging.debug(f"query sql: {query_sql}")
                 logging.debug(f"current timeout: {current_timeout}")
                 self.cursor.execute("set statement_timeout = %d" % (current_timeout * 1000))
@@ -84,7 +91,7 @@ class PostgresDriver(AbstractDriver):
             run_time.append(duration)
         # reset the timeout to the default configuration
         self.cursor.execute("set statement_timeout=0;")
-        self.cursor.execute("drop view if exists REVENUE0;")
+        self.cursor.execute("drop view if exists revenue0_PID;")
         return run_time
 
     def run_queries_with_total_timeout(self, query_list, timeout):
@@ -115,7 +122,7 @@ class PostgresDriver(AbstractDriver):
             total_runtime += duration
         # reset the timeout to the default configuration
         self.cursor.execute("set statement_timeout=0;")
-        self.cursor.execute("drop view if exists REVENUE0;")
+        self.cursor.execute("drop view if exists revenue0_PID;")
         logging.debug(f"runtime {run_time}")
         return total_runtime
 
