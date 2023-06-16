@@ -27,6 +27,7 @@ import json
 import os
 import re
 import itertools
+import yaml
 
 udo_parser = argparse.ArgumentParser(description='UDO index candidate generator.')
 
@@ -37,8 +38,11 @@ args = udo_parser.parse_args()
 # change
 args = vars(args)
 
+#with open(args['db_schema']) as f:
+#    db_schema = json.load(f)
+
 with open(args['db_schema']) as f:
-    db_schema = json.load(f)
+    db_schema = yaml.safe_load(f)["mythril"]["attributes"]
 
 if args['queries']:
     queries = dict()
@@ -46,6 +50,7 @@ if args['queries']:
         if file_name.endswith(".sql"):
             with open(os.path.join(args['queries'], file_name)) as f:
                 content = f.read()
+                content = " ".join([c.strip() for c in content.split("\n")])
                 queries[file_name] = content
 
 table_pattern = re.compile("FROM(.*)WHERE")
@@ -61,7 +66,6 @@ for query_id, query in queries.items():
             rename_table_dict[join_element[:rename_pos].strip()] = [join_element[rename_pos + 2:].strip()]
         else:
             rename_table_dict[join_element[:rename_pos].strip()].append(join_element[rename_pos + 2:].strip())
-    print(rename_table_dict)
     where_clause = where_pattern.findall(query)[0]
     for table, columns in db_schema.items():
         if table in rename_table_dict:
@@ -72,7 +76,6 @@ for query_id, query in queries.items():
                             collect_indices[table] = [column]
                         elif column not in collect_indices[table]:
                             collect_indices[table].append(column)
-print(collect_indices)
 
 for k in collect_indices.keys():
     all_candidate = collect_indices[k]
@@ -80,4 +83,4 @@ for k in collect_indices.keys():
     for i in range(1, len(all_candidate) + 1):
         v += [','.join(comb) for comb in (itertools.combinations(all_candidate, i))]
     for i in range(len(v)):
-        print("('IDX_%s_%d','%s','%s')," % (k, i, k, v[i]))
+        print("IDX_%s_%d;%s;%s" % (k, i, k.upper(), v[i].upper()))
