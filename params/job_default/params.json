@@ -27,11 +27,11 @@
     "set force_parallel_mode = on;"
   ],
   [
-    "set max_parallel_workers_per_gather = 2;",
-    "set max_parallel_workers_per_gather = 0;",
-    "set max_parallel_workers_per_gather = 10;",
-    "set max_parallel_workers_per_gather = 100;",
-    "set max_parallel_workers_per_gather = 1000;"
+    "set max_parallel_workers = 2;",
+    "set max_parallel_workers = 0;",
+    "set max_parallel_workers = 10;",
+    "set max_parallel_workers = 100;",
+    "set max_parallel_workers = 1000;"
   ],
   [
     "set temp_buffers = 1024;",
@@ -65,5 +65,19 @@
   [
     "SET enable_nestloop = on;",
     "SET enable_nestloop = off;"
+  ],
+  [
+    "set effective_io_concurrency = 1;",
+    "set effective_io_concurrency = 0;",
+    "set effective_io_concurrency = 10;",
+    "set effective_io_concurrency = 100;",
+    "set effective_io_concurrency = 1000;"
+  ],
+  [
+    "set maintenance_work_mem = 65536;",
+    "set maintenance_work_mem = 1024;",
+    "set maintenance_work_mem = 32768;",
+    "set maintenance_work_mem = 262144;",
+    "set maintenance_work_mem = 2097152;"
   ]
 ]
