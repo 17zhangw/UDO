@@ -37,6 +37,17 @@ from udo.udo_optimization.envs.udo_env import UDOEnv
 def run_udo_agent(driver, queries, candidate_indices, tuning_config):
     duration_in_seconds = tuning_config['duration'] * 3600
 
+    check_candidate_indices = []
+    for ci in candidate_indices:
+        try:
+            driver.build_index(ci)
+            driver.drop_index(ci)
+            check_candidate_indices.append(ci)
+            logging.debug(f"{ci} index has no problem.")
+        except Exception as e:
+            logging.debug(f"Encountered exception {e} for {ci}")
+    candidate_indices = check_candidate_indices
+
     env = gym.make('udo_optimization-v0', driver=driver, queries=queries, candidate_indices=candidate_indices,
                    config=tuning_config)
 
@@ -165,7 +176,7 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
                 if estimate_workload_time < best_simulation_time:
                     best_simulation_time = estimate_workload_time
                     best_configs = {"heavy": selected_heavy_action_frozen, "light": selected_light_actions}
-                    logging.info(f"new_best_config {best_configs}")
+                    logging.debug("new_best_config: %s", env.print_debug_action_str(list(selected_heavy_action_frozen), selected_light_actions))
 
                 current_time = time.time()
                 logging.debug(f"current global time: {(current_time - start_time)}")
@@ -226,7 +237,7 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
                         delta_improvement += (previous_runtime - current_runtime)
                     previous_performance = applicable_query_performance
                     logging.debug(f"applicable_query_performance: {applicable_query_performance}")
-                    logging.debug("previous_performance: {previous_performance}")
+                    logging.debug(f"previous_performance: {previous_performance}")
                     delta_improvement = max(delta_improvement, 0)
                     update_reward.append(delta_improvement)
             # update the tree based on the simulation results
@@ -240,6 +251,16 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
         logging.debug(f"current time: {(end_episode_time - start_time)}")
         logging.debug(f"time for indices: {idx_build_time}")
         env.print_action_summary(heavy_root.best_actions())
+
+        best_seen_heavy_root = frozenset(heavy_root.best_actions())
+        if best_seen_heavy_root in light_tree_cache:
+            light_root = light_tree_cache[best_seen_heavy_root]
+        else:
+            light_root = uct_node(round=0, tree_level=0, tree_height=light_tree_height, state=init_state, env=env,
+                                  space_type=SpaceType.Light)
+        best_seen_light_actions = light_root.best_actions()
+        logging.debug("best_eps_so_far: %s", env.print_debug_action_str(list(best_seen_heavy_root), best_seen_light_actions))
+
         t1 += max_delay_time
 
     best_heavy_actions = heavy_root.best_actions()

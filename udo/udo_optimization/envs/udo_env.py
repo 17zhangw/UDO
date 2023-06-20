@@ -376,6 +376,21 @@ class UDOEnv(gymnasium.Env):
         for i in range(len(parameter_state)):
             logging.info(self.driver.get_system_parameter_command(i, parameter_state[i]))
 
+    def print_debug_action_str(self, heavy_actions, light_actions):
+        """print action summary given actions"""
+        best_indices = [self.candidate_indices[action_idx] for action_idx in (heavy_actions + light_actions) if action_idx < self.nA_index]
+        best_sys_actions = [action_idx for action_idx in (heavy_actions + light_actions) if action_idx >= self.nA_index]
+
+        indices = []
+        sys = []
+        if best_indices is not None and len(best_indices) > 0:
+            for best_index in best_indices:
+                indices.append(self.driver.build_index_command(best_index))
+        if best_sys_actions is not None and len(best_sys_actions) > 0:
+            for sys_action in best_sys_actions:
+                sys.append(self.retrieve_light_action_command(sys_action))
+        return {"indices": indices, "sys": sys}
+
     def print_action_summary(self, actions):
         """print action summary given actions"""
         best_indices = [self.candidate_indices[action_idx] for action_idx in actions if action_idx < self.nA_index]

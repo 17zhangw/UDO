@@ -62,21 +62,30 @@ class PostgresDriver(AbstractDriver):
             cardinality_info[table[0].lower()] = cardinality
         return cardinality_info
 
+    def _force_statement_timeout(self, timeout):
+        retry = True
+        while retry:
+            try:
+                self.cursor.execute(f"set statement_timeout = {timeout * 1000}")
+                retry = False
+            except:
+                pass
+
     def run_queries_with_timeout(self, query_list, timeout):
         """run queries with a timeout"""
         run_time = []
         for query_sql, current_timeout in zip(query_list, timeout):
+            self._force_statement_timeout(current_timeout)
             try:
                 # Run the warmup query.
-                self.cursor.execute("set statement_timeout = %d" % (current_timeout * 1000))
                 self.cursor.execute(query_sql)
             except:
                 self.cursor.execute("drop view if exists revenue0_PID;")
 
+            self._force_statement_timeout(current_timeout)
             try:
                 # logging.debug(f"query sql: {query_sql}")
                 logging.debug(f"current timeout: {current_timeout}")
-                self.cursor.execute("set statement_timeout = %d" % (current_timeout * 1000))
                 start_time = time.time()
                 self.cursor.execute(query_sql)
                 finish_time = time.time()
@@ -87,10 +96,13 @@ class PostgresDriver(AbstractDriver):
                 # error to run the query, set duration to a large number
                 logging.debug(f"Internal Error for query {query_sql}")
                 duration = current_timeout * 1000
+
+            self._force_statement_timeout(0)
             logging.debug(f"duration: {duration}")
             run_time.append(duration)
+
         # reset the timeout to the default configuration
-        self.cursor.execute("set statement_timeout=0;")
+        self._force_statement_timeout(0)
         self.cursor.execute("drop view if exists revenue0_PID;")
         return run_time
 
