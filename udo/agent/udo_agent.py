@@ -56,6 +56,7 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
     index_to_applicable_queries = env.index_to_applicable_queries
 
     start_tune_time = time.time()
+    last_log_time = time.time()
     logging.debug(f"start time: {start_tune_time}")
 
     optimizer = order_optimizer.OrderOptimizer(index_card_info)
@@ -74,6 +75,15 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
     # reset the environment
     env.reset()
     default_runtime = env.default_runtime
+
+    def get_tree_best(hr, ltc):
+        best_hr = frozenset(hr.best_actions())
+        if best_hr in ltc:
+            lr = ltc[best_hr]
+        else:
+            lr = uct_node(round=0, tree_level=0, tree_height=light_tree_height, state=init_state, env=env, space_type=SpaceType.Light)
+        best_lr = lr.best_actions()
+        return best_hr, best_lr
 
     heavy_root = uct_node(round=0, tree_level=0, tree_height=heavy_tree_height, state=init_state, env=env,
                           space_type=SpaceType.Heavy)
@@ -195,6 +205,13 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
                         best_micro_performance[sample_query] = run_time[sample_query_id]
                 if sum(run_time) < best_reward:
                     best_reward = sum(run_time)
+
+                # Log every 15 minutes on each micro-episode.
+                if time.time() - last_log_time >= 15:
+                    best_hr, best_lr = get_tree_best(heavy_root, light_tree_cache)
+                    logging.debug("interval_check: %s", env.print_debug_action_str(list(best_hr), best_lr))
+                    last_log_time = time.time()
+
             # save the performance of current selected heavy action
             macro_performance_info[selected_heavy_action_frozen] = best_micro_performance
 
@@ -252,14 +269,8 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
         logging.debug(f"time for indices: {idx_build_time}")
         env.print_action_summary(heavy_root.best_actions())
 
-        best_seen_heavy_root = frozenset(heavy_root.best_actions())
-        if best_seen_heavy_root in light_tree_cache:
-            light_root = light_tree_cache[best_seen_heavy_root]
-        else:
-            light_root = uct_node(round=0, tree_level=0, tree_height=light_tree_height, state=init_state, env=env,
-                                  space_type=SpaceType.Light)
-        best_seen_light_actions = light_root.best_actions()
-        logging.debug("best_eps_so_far: %s", env.print_debug_action_str(list(best_seen_heavy_root), best_seen_light_actions))
+        best_hr, best_lr = get_tree_best(heavy_root, light_tree_cache)
+        logging.debug("best_eps_so_far: %s", env.print_debug_action_str(list(best_hr), best_lr))
 
         t1 += max_delay_time
 
@@ -313,7 +324,7 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
 
     # really build index and evaluate the performance
     env.index_step(add_action, drop_action)
-    micro_episode_final_tune = 50
+    micro_episode_final_tune = 5
     default_total_time = sum(default_runtime)
     best_light_runtime = sum(default_runtime)
     best_light_config_simulation = []
@@ -347,11 +358,11 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
     logging.info(f"end: {final_tune_time}")
 
     logging.info(f"Summary: Total Tuning Time {(final_tune_time - start_tune_time) / 3600} hours")
-    logging.info(f"Index Recommendation from MCTS according to metric 1")
+    logging.info(f"M1: Index Recommendation from MCTS according to metric 1")
     env.print_action_summary(best_heavy_actions)
-    logging.info(f"Index Recommendation from MCTS according to metric 2")
+    logging.info(f"M2: Index Recommendation from MCTS according to metric 2")
     env.print_action_summary(best_heavy_action_alternatives)
-    logging.info(f"System Parameter Recommendation from MCTS according to metric 1")
+    logging.info(f"M1: System Parameter Recommendation from MCTS according to metric 1")
     env.print_action_summary(best_light_actions)
-    logging.info(f"System Parameter Recommendation form MCTS according to metric 2")
+    logging.info(f"M2: System Parameter Recommendation from MCTS according to metric 2")
     env.print_action_summary(best_light_config_simulation)

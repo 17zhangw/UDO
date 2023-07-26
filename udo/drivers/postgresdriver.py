@@ -76,13 +76,6 @@ class PostgresDriver(AbstractDriver):
         run_time = []
         for query_sql, current_timeout in zip(query_list, timeout):
             self._force_statement_timeout(current_timeout)
-            #try:
-            #    # Run the warmup query.
-            #    self.cursor.execute(query_sql)
-            #except:
-            #    self.cursor.execute("drop view if exists revenue0_PID;")
-
-            self._force_statement_timeout(current_timeout)
             try:
                 # logging.debug(f"query sql: {query_sql}")
                 logging.debug(f"current timeout: {current_timeout}")
