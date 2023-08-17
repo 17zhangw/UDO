@@ -58,20 +58,24 @@ where_pattern = re.compile("WHERE(.*)")
 collect_indices = dict()
 for query_id, query in queries.items():
     matches = table_pattern.findall(query)
+    if len(matches) == 0:
+        continue
+
     join_elements = matches[0].split(',')
     rename_table_dict = {}
     for join_element in join_elements:
-        rename_pos = join_element.index("AS")
-        if join_element[:rename_pos].strip() not in rename_table_dict:
+        if "AS" not in join_element:
+            rename_table_dict[join_element.strip().lower()] = [join_element.strip().lower()]
+        elif join_element[:rename_pos].strip() not in rename_table_dict:
             rename_table_dict[join_element[:rename_pos].strip()] = [join_element[rename_pos + 2:].strip()]
         else:
             rename_table_dict[join_element[:rename_pos].strip()].append(join_element[rename_pos + 2:].strip())
-    where_clause = where_pattern.findall(query)[0]
+    where_clause = where_pattern.findall(query)[0].lower()
     for table, columns in db_schema.items():
         if table in rename_table_dict:
             for rename_table in rename_table_dict[table]:
                 for column in columns:
-                    if rename_table + '.' + column in where_clause:
+                    if rename_table + '.' + column in where_clause or column in where_clause:
                         if table not in collect_indices:
                             collect_indices[table] = [column]
                         elif column not in collect_indices[table]:

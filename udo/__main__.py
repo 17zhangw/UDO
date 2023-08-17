@@ -56,6 +56,13 @@ if __name__ == "__main__":
                             help='the input query file')
     udo_parser.add_argument('-sys_params',
                             help='the input system params json file')
+
+    udo_parser.add_argument('--benchmark', help='benchmark')
+    udo_parser.add_argument("--benchbase-path", default=None)
+    udo_parser.add_argument("--benchbase-config", default=None)
+    udo_parser.add_argument("--pg-path", default=None)
+    udo_parser.add_argument("--pg-data", default=None)
+
     # tuning time
     udo_parser.add_argument('-duration', default=5, type=float,
                             help='time for tuning in hours')
@@ -155,31 +162,46 @@ if __name__ == "__main__":
 
     # create a dbms driver
     driver = None
+    bench = (
+        args["benchmark"],
+        args["benchbase_path"],
+        args["benchbase_config"],
+        args["pg_path"],
+        args["pg_data"],
+    )
+
     if args['system'] == "postgres":
-        driver = PostgresDriver(dbms_conf, sys_params)
+        driver = PostgresDriver(dbms_conf, sys_params, benchmark=bench)
 
     # obtain index cardinality information
     driver.connect()
     cardinality_info = driver.cardinalities()
 
-    # obtain index applicable queries
-    for i in range(len(candidate_indices)):
-        contain_query = []
-        for query_id, query_str in queries.items():
-            # print(candidate_indices[i][2])
-            if "where" in query_str:
-                where_clause = query_str[query_str.index("where"):].lower()
-            else:
-                where_clause = query_str.lower()
-            contain_columns = candidate_indices[i][2].lower().split(",")
-            if all(contain_column in where_clause for contain_column in contain_columns):
-                # if any(contain_column in where_clause for contain_column in contain_columns):
-                contain_query.append(query_id)
-        index_cardinality = cardinality_info[candidate_indices[i][1].lower()]
-        candidate_indices[i] += (contain_query, index_cardinality,)
+    if len(queries) == 0:
+        for i in range(len(candidate_indices)):
+            index_cardinality = cardinality_info[candidate_indices[i][1].lower()]
+            candidate_indices[i] += ([], index_cardinality,)
 
-    # filter indices which contains at least has one appliable query
-    candidate_indices = [candidate_index for candidate_index in candidate_indices if len(candidate_index[3]) > 0]
+        candidate_indices = [candidate_index for candidate_index in candidate_indices]
+    else:
+        # obtain index applicable queries
+        for i in range(len(candidate_indices)):
+            contain_query = []
+            for query_id, query_str in queries.items():
+                # print(candidate_indices[i][2])
+                if "where" in query_str:
+                    where_clause = query_str[query_str.index("where"):].lower()
+                else:
+                    where_clause = query_str.lower()
+                contain_columns = candidate_indices[i][2].lower().split(",")
+                if all(contain_column in where_clause for contain_column in contain_columns):
+                    # if any(contain_column in where_clause for contain_column in contain_columns):
+                    contain_query.append(query_id)
+            index_cardinality = cardinality_info[candidate_indices[i][1].lower()]
+            candidate_indices[i] += (contain_query, index_cardinality,)
+
+        # filter indices which contains at least has one appliable query
+        candidate_indices = [candidate_index for candidate_index in candidate_indices if len(candidate_index[3]) > 0]
 
     # print(len(index.candidate_indices))
 

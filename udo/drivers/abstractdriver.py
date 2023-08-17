@@ -24,7 +24,7 @@
 import logging
 
 class AbstractDriver(object):
-    def __init__(self, driver_name, conf, sys_params):
+    def __init__(self, driver_name, conf, sys_params, *args, **kwargs):
         self.driver_name = driver_name
         self.config = conf
         self.sys_params = sys_params

@@ -22,7 +22,11 @@
 # -----------------------------------------------------------------------
 
 import logging
+import shutil
 import time
+import json
+from pathlib import Path
+from plumbum import local
 
 import psycopg
 from psycopg.errors import InternalError, QueryCanceled
@@ -32,8 +36,10 @@ from .abstractdriver import *
 class PostgresDriver(AbstractDriver):
     """the DBMS driver for Postgres"""
 
-    def __init__(self, conf, sys_params):
+    def __init__(self, conf, sys_params, benchmark=None):
         super(PostgresDriver, self).__init__("postgres", conf, sys_params)
+        self.benchmark = benchmark
+        self.conn = None
 
     def connect(self):
         """connect to a database"""
@@ -71,8 +77,110 @@ class PostgresDriver(AbstractDriver):
             except:
                 pass
 
+    def _shutdown(self):
+        if self.cursor is not None:
+            self.cursor.close()
+        if self.conn is not None:
+            self.conn.close()
+
+        while True:
+            _, stdout, stderr = local[f"{self.benchmark[3]}/pg_ctl"][
+                "stop",
+                "--wait",
+                "-t", "180",
+                "-D", f"{self.benchmark[3]}/{self.benchmark[4]}"].run(retcode=None)
+            time.sleep(1)
+
+            # Wait until pg_isready fails.
+            retcode, _, _ = local[f"{self.benchmark[3]}/pg_isready"][
+                "--host", "localhost",
+                "--port", "5432",
+                "--dbname", "benchbase"].run(retcode=None)
+
+            exists = (Path(self.benchmark[3]) / self.benchmark[4] / "postmaster.pid").exists()
+            if not exists and retcode != 0:
+                break
+
+    def _start(self):
+        # Make sure the PID lock file doesn't exist.
+        pid_lock = Path(self.benchmark[3]) / self.benchmark[4] / "postmaster.pid"
+        assert not pid_lock.exists()
+
+        attempts = 0
+        while not pid_lock.exists():
+            # Try starting up.
+            retcode, stdout, stderr = local[f"{self.benchmark[3]}/pg_ctl"][
+                "-D", f"{self.benchmark[3]}/{self.benchmark[4]}",
+                "--wait",
+                "-t", "180",
+                "-l", f"{self.benchmark[3]}/{self.benchmark[4]}/pg.log",
+                "start"].run(retcode=None)
+
+            if retcode == 0 or pid_lock.exists():
+                break
+
+            logging.warn("startup encountered: (%s, %s)", stdout, stderr)
+            attempts += 1
+            if attempts >= 5:
+                logging.error("Number of attempts to start postgres has exceeded limit.")
+                assert False
+
+        # Wait until postgres is ready to accept connections.
+        num_cycles = 0
+        while True:
+            if num_cycles >= 5:
+                # In this case, we've failed to start postgres.
+                logging.error("Failed to start postgres before timeout...")
+                assert False
+
+            retcode, _, _ = local[f"{self.benchmark[3]}/pg_isready"][
+                "--host", "localhost",
+                "--port", "5432",
+                "--dbname", "benchbase"].run(retcode=None)
+            if retcode == 0:
+                break
+
+            time.sleep(1)
+            num_cycles += 1
+
     def run_queries_with_timeout(self, query_list, timeout):
         """run queries with a timeout"""
+        if len(query_list) == 0:
+            # Shutdown and tar the image.
+            self._shutdown()
+            local["tar"]["cf", f"{self.benchmark[3]}/{self.benchmark[4]}.tgz", "-C", self.benchmark[3], self.benchmark[4]].run()
+            self._start()
+
+            with local.cwd(self.benchmark[1]):
+                results = "/tmp/results"
+                shutil.rmtree(results, ignore_errors=True)
+
+                code, _, _ = local["java"][
+                    "-jar", "benchbase.jar",
+                    "-b", "tpcc",
+                    "-c", self.benchmark[2],
+                    "-d", results,
+                    "--execute=true"].run(retcode=None)
+
+                assert code == 0
+
+            self._shutdown()
+            local["rm"]["-rf", f"{self.benchmark[3]}/{self.benchmark[4]}"].run()
+            local["mkdir"]["-m", "0700", "-p", f"{self.benchmark[3]}/{self.benchmark[4]}"].run()
+            local["tar"]["xf", f"{self.benchmark[3]}/{self.benchmark[4]}.tgz", "-C", f"{self.benchmark[3]}/{self.benchmark[4]}", "--strip-components", "1"].run()
+            self._start()
+
+            self.conn = psycopg.connect("host=localhost port=5432 dbname='%s' user='%s'" % (self.config["db"], self.config["user"]), autocommit=True, prepare_threshold=None)
+            self.cursor = self.conn.cursor()
+
+            files = [f for f in Path(results).rglob("*.summary.json")]
+            assert len(files) == 1
+            with open(files[0], "r") as f:
+                tps = json.load(f)["Throughput (requests/second)"]
+            logging.info(f"Benchmark iteration with tps: {tps}")
+            # Use a negative reward so we are "minimizing".
+            return [-tps]
+
         run_time = []
         for query_sql, current_timeout in zip(query_list, timeout):
             self._force_statement_timeout(current_timeout)
