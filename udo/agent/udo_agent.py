@@ -212,8 +212,16 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
                     logging.debug("interval_check: %s", env.print_debug_action_str(list(best_hr), best_lr))
                     last_log_time = time.time()
 
+                # Break out early out of the micro episode.
+                if time.time() - start_time >= duration_in_seconds:
+                    break
+
             # save the performance of current selected heavy action
             macro_performance_info[selected_heavy_action_frozen] = best_micro_performance
+
+            # Break out of the configuration orders
+            if time.time() - start_time >= duration_in_seconds:
+                break
 
         logging.debug(f"macro_performance_info: {macro_performance_info}")
         # sys.stdout.flush()
@@ -238,6 +246,11 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
                 if selected_heavy_actions[i] != terminate_action:
                     selected_heavy_action_frozen = frozenset(selected_heavy_actions[:i + 1])
                     logging.debug(f"current selected_heavy_action_frozen: {selected_heavy_action_frozen}")
+                    if selected_heavy_action_frozen not in selected_heavy_actions:
+                        # This is here because we might break out earlier above.
+                        update_reward.append(0)
+                        continue
+
                     applicable_query_performance = macro_performance_info[selected_heavy_action_frozen]
                     # generate reward based on the difference between previous performance and current performance
                     # the query for current indices
@@ -275,80 +288,14 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
         t1 += max_delay_time
 
     best_heavy_actions = heavy_root.best_actions()
-    best_heavy_action_alternatives = best_heavy_actions
-    if len(best_heavy_action_alternatives) < heavy_tree_height:
-        first_layer_reward_info = heavy_root.print_reward_info()
-        first_layer_reward_sorted_info = sorted(first_layer_reward_info, reverse=True)
-        # topK_rewards = first_layer_reward_sorted_info[:heavy_tree_height]
-        # topK_actions = [first_layer_reward_info.index(reward) for reward in topK_rewards]
-        # may exist a issue index performance is tie, but very unlikely happened
-        indexed_columns = set()
-        for top_action in best_heavy_actions:
-            top_index = candidate_indices[top_action]
-            current_index_columns = top_index[2].split(",")
-            indexed_columns.update(current_index_columns)
-        # for top_action in topK_actions:
-        while len(best_heavy_action_alternatives) < heavy_tree_height:
-            # test whether this index appear before
-            top_reward = first_layer_reward_sorted_info[0]
-            top_action = first_layer_reward_info.index(top_reward)
-            top_index = candidate_indices[top_action]
-            current_index_columns = top_index[2].split(",")
-            if not any(current_index_column in indexed_columns for current_index_column in current_index_columns):
-                best_heavy_action_alternatives.append(top_action)
-                indexed_columns.update(current_index_columns)
-            first_layer_reward_sorted_info.pop(0)
-
     best_frozen_heavy_configs = frozenset(best_heavy_action_alternatives)
     if best_frozen_heavy_configs in light_tree_cache:
         light_root = light_tree_cache[best_frozen_heavy_configs]
     else:
         light_root = uct_node(round=0, tree_level=0, tree_height=light_tree_height, state=init_state, env=env,
                               space_type=SpaceType.Light)
-
-    add_action = set(best_heavy_actions) - previous_set
-    drop_action = previous_set - set(best_heavy_actions)
-
-    # best frozen heavy configs
-    # best_frozen_heavy_configs = frozenset(best_heavy_actions)
-    # if best_frozen_heavy_configs in light_tree_cache:
-    #     light_root = light_tree_cache[best_frozen_heavy_configs]
-    # else:
-    #     light_root = uct_node(round=0, tree_level=0, tree_height=light_tree_height, state=init_state, env=env,
-    #                           space_type=SpaceType.Light)
-
-    # additional step, tuning the final index configuration
-    # build the indices
-    # add_action = set(best_heavy_actions) - previous_set
-    # drop_action = previous_set - set(best_heavy_actions)
-
-    # really build index and evaluate the performance
-    env.index_step(add_action, drop_action)
-    micro_episode_final_tune = 5
-    default_total_time = sum(default_runtime)
-    best_light_runtime = sum(default_runtime)
-    best_light_config_simulation = []
-    for t2 in range(1, micro_episode_final_tune):
-        # for the micro episode
-        env.reset()
-        selected_light_actions = light_root.sample(t1 * micro_episode + t2)
-        # evaluate the light actions
-        for selected_light_action in selected_light_actions:
-            # move to next state
-            state = env.step_without_evaluation(selected_light_action)
-        # obtain run time info by running queries within timeout
-        run_time = env.evaluate([query for query in range(nr_query)])
-        # the total time of total queries
-        total_run_time = sum(run_time)
-        if total_run_time < best_light_runtime:
-            best_light_runtime = total_run_time
-            best_light_config_simulation = selected_light_actions
-        # the relative ration of the improvement, the less of total_run_time, the better
-        light_reward = default_total_time / total_run_time
-        logging.debug(f"light_action: {selected_light_actions}")
-        logging.debug(f"light_reward: {light_reward}")
-        light_root.update_statistics_with_mcts_reward(light_reward, selected_light_actions)
     best_light_actions = light_root.best_actions()
+
     # best heavy action from tree search
     logging.info(f"best configurations during the simulation {best_configs}")
     logging.info(f"best heavy action from tree search {heavy_root.best_actions()}")
@@ -360,9 +307,5 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
     logging.info(f"Summary: Total Tuning Time {(final_tune_time - start_tune_time) / 3600} hours")
     logging.info(f"M1: Index Recommendation from MCTS according to metric 1")
     env.print_action_summary(best_heavy_actions)
-    logging.info(f"M2: Index Recommendation from MCTS according to metric 2")
-    env.print_action_summary(best_heavy_action_alternatives)
     logging.info(f"M1: System Parameter Recommendation from MCTS according to metric 1")
     env.print_action_summary(best_light_actions)
-    logging.info(f"M2: System Parameter Recommendation from MCTS according to metric 2")
-    env.print_action_summary(best_light_config_simulation)

@@ -30,6 +30,7 @@ from plumbum import local
 
 import psycopg
 from psycopg.errors import InternalError, QueryCanceled
+from plumbum import local
 
 from .abstractdriver import *
 
@@ -272,8 +273,20 @@ class PostgresDriver(AbstractDriver):
     def set_system_parameter(self, parameter_sql):
         """switch system parameters"""
         logging.info(f"{parameter_sql}")
-        self.cursor.execute(parameter_sql)
-        # self.conn.commit()
+
+        self.cursor.execute("ALTER SYSTEM " + parameter_sql)
+
+        # Close.
+        self.close()
+        _, _, _ = local["/mnt/nvme0n1/wz2/noisepage/pg_ctl"][
+            "-D", "/mnt/nvme0n1/wz2/noisepage/pgdata",
+            "--wait",
+            "-t", "180",
+            "-l", "/mnt/nvme0n1/wz2/noisepage/pg.log",
+            "restart"].run(retcode=None)
+
+        # Connect.
+        self.connect()
 
     def analyze_queries_cost(self, query_sqls):
         """analyze cost of queries"""

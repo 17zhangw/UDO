@@ -23,8 +23,19 @@
     "set enable_mergejoin = off;"
   ],
   [
+    "set enable_hashjoin = on;",
+    "set enable_hashjoin = off;"
+  ],
+  [
     "set force_parallel_mode = off;",
     "set force_parallel_mode = on;"
+  ],
+  [
+    "set max_worker_processes = 2;",
+    "set max_worker_processes = 0;",
+    "set max_worker_processes = 10;",
+    "set max_worker_processes = 100;",
+    "set max_worker_processes = 1000;"
   ],
   [
     "set max_parallel_workers = 2;",
@@ -59,12 +70,24 @@
     "set max_parallel_workers_per_gather = 100;"
   ],
   [
+    "set enable_parallel_hash = on;",
+    "set enable_parallel_hash = off;"
+  ],
+  [
+    "set enable_memoize = on;",
+    "set enable_memoize = off;"
+  ],
+  [
+    "set enable_material = on;",
+    "set enable_material = off;"
+  ],
+  [
     "set enable_tidscan = on;",
     "set enable_tidscan = off;"
   ],
   [
-    "SET enable_nestloop = on;",
-    "SET enable_nestloop = off;"
+    "set enable_nestloop = on;",
+    "set enable_nestloop = off;"
   ],
   [
     "set effective_io_concurrency = 1;",
@@ -74,10 +97,37 @@
     "set effective_io_concurrency = 1000;"
   ],
   [
+    "set effective_cache_size = 65536;",
+    "set effective_cache_size = 1024;",
+    "set effective_cache_size = 32768;",
+    "set effective_cache_size = 262144;",
+    "set effective_cache_size = 2097152;"
+  ],
+  [
     "set maintenance_work_mem = 65536;",
     "set maintenance_work_mem = 1024;",
     "set maintenance_work_mem = 32768;",
     "set maintenance_work_mem = 262144;",
     "set maintenance_work_mem = 2097152;"
+  ],
+  [
+    "set work_mem = 65536;",
+    "set work_mem = 1024;",
+    "set work_mem = 32768;",
+    "set work_mem = 262144;",
+    "set work_mem = 2097152;"
+  ],
+  [
+    "set hash_mem_multiplier = 1;",
+    "set hash_mem_multiplier = 2;",
+    "set hash_mem_multiplier = 10;",
+    "set hash_mem_multiplier = 100;",
+    "set hash_mem_multiplier = 1000;"
+  ],
+  [
+    "set shared_buffers = '1GB';",
+    "set shared_buffers = '4GB';",
+    "set shared_buffers = '8GB';",
+    "set shared_buffers = '32GB';"
   ]
 ]
