@@ -288,7 +288,7 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
         t1 += max_delay_time
 
     best_heavy_actions = heavy_root.best_actions()
-    best_frozen_heavy_configs = frozenset(best_heavy_action_alternatives)
+    best_frozen_heavy_configs = frozenset(best_heavy_actions)
     if best_frozen_heavy_configs in light_tree_cache:
         light_root = light_tree_cache[best_frozen_heavy_configs]
     else:
