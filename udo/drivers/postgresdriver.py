@@ -274,7 +274,25 @@ class PostgresDriver(AbstractDriver):
         """switch system parameters"""
         logging.info(f"{parameter_sql}")
 
-        self.cursor.execute("ALTER SYSTEM " + parameter_sql)
+        if "_fillfactor" in parameter_sql:
+            tbl = parameter_sql.split(" ")[1].split("_fillfactor")[0]
+            ff = int(parameter_sql.split(" = ")[-1])
+            orig_ff = None
+
+            pgc_record = [r for r in self.cursor.execute(f"SELECT * FROM pg_class where relname = '{tbl}'", prepare=False)][0]
+            if pgc_record["reloptions"] is not None:
+                for record in pgc_record["reloptions"]:
+                    for key, value in re.findall(r'(\w+)=(\w*)', record):
+                        if key == "fillfactor":
+                            orig_ff = int(value)
+
+            if orig_ff is None or ff != orig_ff:
+                self.cursor.execute(f"ALTER TABLE {tbl} SET (fillfactor = {ff})")
+                self.cursor.execute("VACUUM FULL {tbl}")
+                self.cursor.execute("CHECKPOINT")
+
+        else:
+            self.cursor.execute("ALTER SYSTEM " + parameter_sql)
 
         # Close.
         self.close()
