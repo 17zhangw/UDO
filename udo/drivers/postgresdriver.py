@@ -22,6 +22,7 @@
 # -----------------------------------------------------------------------
 
 import logging
+import re
 import shutil
 import time
 import json
@@ -29,6 +30,7 @@ from pathlib import Path
 from plumbum import local
 
 import psycopg
+from psycopg.rows import dict_row
 from psycopg.errors import InternalError, QueryCanceled
 from plumbum import local
 
@@ -276,19 +278,20 @@ class PostgresDriver(AbstractDriver):
 
         if "_fillfactor" in parameter_sql:
             tbl = parameter_sql.split(" ")[1].split("_fillfactor")[0]
-            ff = int(parameter_sql.split(" = ")[-1])
+            ff = int(parameter_sql.split(" = ")[-1].split(";")[0])
             orig_ff = None
 
-            pgc_record = [r for r in self.cursor.execute(f"SELECT * FROM pg_class where relname = '{tbl}'", prepare=False)][0]
-            if pgc_record["reloptions"] is not None:
-                for record in pgc_record["reloptions"]:
-                    for key, value in re.findall(r'(\w+)=(\w*)', record):
-                        if key == "fillfactor":
-                            orig_ff = int(value)
+            with self.conn.cursor(row_factory=dict_row) as cursor:
+                pgc_record = [r for r in cursor.execute(f"SELECT * FROM pg_class where relname = '{tbl}'", prepare=False)][0]
+                if pgc_record["reloptions"] is not None:
+                    for record in pgc_record["reloptions"]:
+                        for key, value in re.findall(r'(\w+)=(\w*)', record):
+                            if key == "fillfactor":
+                                orig_ff = int(value)
 
             if orig_ff is None or ff != orig_ff:
                 self.cursor.execute(f"ALTER TABLE {tbl} SET (fillfactor = {ff})")
-                self.cursor.execute("VACUUM FULL {tbl}")
+                self.cursor.execute(f"VACUUM FULL {tbl}")
                 self.cursor.execute("CHECKPOINT")
 
         else:

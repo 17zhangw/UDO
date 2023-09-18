@@ -174,7 +174,7 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
                                                       sampled_query_list]
                 sum_default_time_of_sampled_queries = sum(default_runtime_of_sampled_queries)
                 # the relative ration of the improvement, the less of total_run_time, the better
-                light_reward = sum_default_time_of_sampled_queries / total_run_time
+                light_reward = sum_default_time_of_sampled_queries / max(total_run_time, 1)
                 logging.debug(f"default_runtime_of_sampled_queries {default_runtime_of_sampled_queries}")
                 logging.debug(f"light_action: {selected_light_actions}")
                 logging.debug(f"light_reward: {light_reward}")
