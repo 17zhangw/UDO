@@ -31,18 +31,18 @@
     "set force_parallel_mode = on;"
   ],
   [
-    "set max_worker_processes = 2;",
+    "set max_worker_processes = 8;",
     "set max_worker_processes = 0;",
+    "set max_worker_processes = 4;",
     "set max_worker_processes = 10;",
-    "set max_worker_processes = 100;",
-    "set max_worker_processes = 1000;"
+    "set max_worker_processes = 20;"
   ],
   [
-    "set max_parallel_workers = 2;",
+    "set max_parallel_workers = 8;",
     "set max_parallel_workers = 0;",
+    "set max_parallel_workers = 4;",
     "set max_parallel_workers = 10;",
-    "set max_parallel_workers = 100;",
-    "set max_parallel_workers = 1000;"
+    "set max_parallel_workers = 20;"
   ],
   [
     "set temp_buffers = 1024;",
@@ -97,11 +97,10 @@
     "set effective_io_concurrency = 1000;"
   ],
   [
+    "set effective_cache_size = 524288;",
     "set effective_cache_size = 65536;",
-    "set effective_cache_size = 1024;",
-    "set effective_cache_size = 32768;",
     "set effective_cache_size = 262144;",
-    "set effective_cache_size = 2097152;"
+    "set effective_cache_size = 4194304;"
   ],
   [
     "set maintenance_work_mem = 65536;",
@@ -111,26 +110,29 @@
     "set maintenance_work_mem = 2097152;"
   ],
   [
-    "set work_mem = 65536;",
+    "set work_mem = 4096;",
+    "set work_mem = 64;",
     "set work_mem = 1024;",
     "set work_mem = 32768;",
     "set work_mem = 262144;",
     "set work_mem = 2097152;"
   ],
   [
-    "set hash_mem_multiplier = 1;",
     "set hash_mem_multiplier = 2;",
+    "set hash_mem_multiplier = 1;",
     "set hash_mem_multiplier = 10;",
     "set hash_mem_multiplier = 100;",
     "set hash_mem_multiplier = 1000;"
   ],
   [
+    "set shared_buffers = '128MB';",
     "set shared_buffers = '1GB';",
     "set shared_buffers = '4GB';",
     "set shared_buffers = '8GB';",
     "set shared_buffers = '32GB';"
   ],
   [
+    "set warehouse_fillfactor = 100;",
     "set warehouse_fillfactor = 10;",
     "set warehouse_fillfactor = 20;",
     "set warehouse_fillfactor = 30;",
@@ -139,10 +141,10 @@
     "set warehouse_fillfactor = 60;",
     "set warehouse_fillfactor = 70;",
     "set warehouse_fillfactor = 80;",
-    "set warehouse_fillfactor = 90;",
-    "set warehouse_fillfactor = 100;"
+    "set warehouse_fillfactor = 90;"
   ],
   [
+    "set district_fillfactor = 100;",
     "set district_fillfactor = 10;",
     "set district_fillfactor = 20;",
     "set district_fillfactor = 30;",
@@ -151,10 +153,10 @@
     "set district_fillfactor = 60;",
     "set district_fillfactor = 70;",
     "set district_fillfactor = 80;",
-    "set district_fillfactor = 90;",
-    "set district_fillfactor = 100;"
+    "set district_fillfactor = 90;"
   ],
   [
+    "set customer_fillfactor = 100;",
     "set customer_fillfactor = 10;",
     "set customer_fillfactor = 20;",
     "set customer_fillfactor = 30;",
@@ -163,10 +165,10 @@
     "set customer_fillfactor = 60;",
     "set customer_fillfactor = 70;",
     "set customer_fillfactor = 80;",
-    "set customer_fillfactor = 90;",
-    "set customer_fillfactor = 100;"
+    "set customer_fillfactor = 90;"
   ],
   [
+    "set history_fillfactor = 100;",
     "set history_fillfactor = 10;",
     "set history_fillfactor = 20;",
     "set history_fillfactor = 30;",
@@ -175,10 +177,10 @@
     "set history_fillfactor = 60;",
     "set history_fillfactor = 70;",
     "set history_fillfactor = 80;",
-    "set history_fillfactor = 90;",
-    "set history_fillfactor = 100;"
+    "set history_fillfactor = 90;"
   ],
   [
+    "set oorder_fillfactor = 100;",
     "set oorder_fillfactor = 10;",
     "set oorder_fillfactor = 20;",
     "set oorder_fillfactor = 30;",
@@ -187,10 +189,10 @@
     "set oorder_fillfactor = 60;",
     "set oorder_fillfactor = 70;",
     "set oorder_fillfactor = 80;",
-    "set oorder_fillfactor = 90;",
-    "set oorder_fillfactor = 100;"
+    "set oorder_fillfactor = 90;"
   ],
   [
+    "set order_line_fillfactor = 100;",
     "set order_line_fillfactor = 10;",
     "set order_line_fillfactor = 20;",
     "set order_line_fillfactor = 30;",
@@ -199,10 +201,10 @@
     "set order_line_fillfactor = 60;",
     "set order_line_fillfactor = 70;",
     "set order_line_fillfactor = 80;",
-    "set order_line_fillfactor = 90;",
-    "set order_line_fillfactor = 100;"
+    "set order_line_fillfactor = 90;"
   ],
   [
+    "set new_order_fillfactor = 100;",
     "set new_order_fillfactor = 10;",
     "set new_order_fillfactor = 20;",
     "set new_order_fillfactor = 30;",
@@ -211,10 +213,10 @@
     "set new_order_fillfactor = 60;",
     "set new_order_fillfactor = 70;",
     "set new_order_fillfactor = 80;",
-    "set new_order_fillfactor = 90;",
-    "set new_order_fillfactor = 100;"
+    "set new_order_fillfactor = 90;"
   ],
   [
+    "set stock_fillfactor = 100;",
     "set stock_fillfactor = 10;",
     "set stock_fillfactor = 20;",
     "set stock_fillfactor = 30;",
@@ -223,10 +225,10 @@
     "set stock_fillfactor = 60;",
     "set stock_fillfactor = 70;",
     "set stock_fillfactor = 80;",
-    "set stock_fillfactor = 90;",
-    "set stock_fillfactor = 100;"
+    "set stock_fillfactor = 90;"
   ],
   [
+    "set item_fillfactor = 100;",
     "set item_fillfactor = 10;",
     "set item_fillfactor = 20;",
     "set item_fillfactor = 30;",
@@ -235,7 +237,6 @@
     "set item_fillfactor = 60;",
     "set item_fillfactor = 70;",
     "set item_fillfactor = 80;",
-    "set item_fillfactor = 90;",
-    "set item_fillfactor = 100;"
+    "set item_fillfactor = 90;"
   ]
 ]

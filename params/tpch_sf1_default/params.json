@@ -31,18 +31,18 @@
     "set force_parallel_mode = on;"
   ],
   [
-    "set max_worker_processes = 2;",
+    "set max_worker_processes = 8;",
     "set max_worker_processes = 0;",
+    "set max_worker_processes = 4;",
     "set max_worker_processes = 10;",
-    "set max_worker_processes = 100;",
-    "set max_worker_processes = 1000;"
+    "set max_worker_processes = 20;"
   ],
   [
-    "set max_parallel_workers = 2;",
+    "set max_parallel_workers = 8;",
     "set max_parallel_workers = 0;",
+    "set max_parallel_workers = 4;",
     "set max_parallel_workers = 10;",
-    "set max_parallel_workers = 100;",
-    "set max_parallel_workers = 1000;"
+    "set max_parallel_workers = 20;"
   ],
   [
     "set temp_buffers = 1024;",
@@ -66,8 +66,9 @@
   [
     "set max_parallel_workers_per_gather = 2;",
     "set max_parallel_workers_per_gather = 0;",
+    "set max_parallel_workers_per_gather = 4;",
     "set max_parallel_workers_per_gather = 10;",
-    "set max_parallel_workers_per_gather = 100;"
+    "set max_parallel_workers_per_gather = 20;"
   ],
   [
     "set enable_parallel_hash = on;",
@@ -97,11 +98,10 @@
     "set effective_io_concurrency = 1000;"
   ],
   [
+    "set effective_cache_size = 524288;",
     "set effective_cache_size = 65536;",
-    "set effective_cache_size = 1024;",
-    "set effective_cache_size = 32768;",
     "set effective_cache_size = 262144;",
-    "set effective_cache_size = 2097152;"
+    "set effective_cache_size = 4194304;"
   ],
   [
     "set maintenance_work_mem = 65536;",
@@ -111,20 +111,22 @@
     "set maintenance_work_mem = 2097152;"
   ],
   [
-    "set work_mem = 65536;",
+    "set work_mem = 4096;",
+    "set work_mem = 64;",
     "set work_mem = 1024;",
     "set work_mem = 32768;",
     "set work_mem = 262144;",
     "set work_mem = 2097152;"
   ],
   [
-    "set hash_mem_multiplier = 1;",
     "set hash_mem_multiplier = 2;",
+    "set hash_mem_multiplier = 1;",
     "set hash_mem_multiplier = 10;",
     "set hash_mem_multiplier = 100;",
     "set hash_mem_multiplier = 1000;"
   ],
   [
+    "set shared_buffers = '128MB';",
     "set shared_buffers = '1GB';",
     "set shared_buffers = '4GB';",
     "set shared_buffers = '8GB';",
