@@ -1,0 +1,182 @@
+[
+  [
+    "set random_page_cost = 4;",
+    "set random_page_cost = 0;",
+    "set random_page_cost = 100;",
+    "set random_page_cost = 1000;",
+    "set random_page_cost = 10000;",
+    "set random_page_cost = 100000;"
+  ],
+  [
+    "set seq_page_cost = 1;",
+    "set seq_page_cost = 10;",
+    "set seq_page_cost = 100;",
+    "set seq_page_cost = 1000;",
+    "set seq_page_cost = 10000;"
+  ],
+  [
+    "set enable_bitmapscan = on;",
+    "set enable_bitmapscan = off;"
+  ],
+  [
+    "set enable_mergejoin = on;",
+    "set enable_mergejoin = off;"
+  ],
+  [
+    "set enable_hashjoin = on;",
+    "set enable_hashjoin = off;"
+  ],
+  [
+    "set force_parallel_mode = off;",
+    "set force_parallel_mode = on;"
+  ],
+  [
+    "set max_worker_processes = 8;",
+    "set max_worker_processes = 0;",
+    "set max_worker_processes = 4;",
+    "set max_worker_processes = 10;",
+    "set max_worker_processes = 20;"
+  ],
+  [
+    "set max_parallel_workers = 8;",
+    "set max_parallel_workers = 0;",
+    "set max_parallel_workers = 4;",
+    "set max_parallel_workers = 10;",
+    "set max_parallel_workers = 20;"
+  ],
+  [
+    "set temp_buffers = 1024;",
+    "set temp_buffers = 100;",
+    "set temp_buffers = 1000;",
+    "set temp_buffers = 10000;",
+    "set temp_buffers = 100000;"
+  ],
+  [
+    "set enable_hashagg = on;",
+    "set enable_hashagg = off;"
+  ],
+  [
+    "set enable_indexscan = on;",
+    "set enable_indexscan = off;"
+  ],
+  [
+    "set enable_seqscan = on;",
+    "set enable_seqscan = off;"
+  ],
+  [
+    "set max_parallel_workers_per_gather = 2;",
+    "set max_parallel_workers_per_gather = 0;",
+    "set max_parallel_workers_per_gather = 10;",
+    "set max_parallel_workers_per_gather = 100;"
+  ],
+  [
+    "set enable_parallel_hash = on;",
+    "set enable_parallel_hash = off;"
+  ],
+  [
+    "set enable_memoize = on;",
+    "set enable_memoize = off;"
+  ],
+  [
+    "set enable_material = on;",
+    "set enable_material = off;"
+  ],
+  [
+    "set enable_tidscan = on;",
+    "set enable_tidscan = off;"
+  ],
+  [
+    "set enable_nestloop = on;",
+    "set enable_nestloop = off;"
+  ],
+  [
+    "set effective_io_concurrency = 1;",
+    "set effective_io_concurrency = 0;",
+    "set effective_io_concurrency = 10;",
+    "set effective_io_concurrency = 100;",
+    "set effective_io_concurrency = 1000;"
+  ],
+  [
+    "set effective_cache_size = 524288;",
+    "set effective_cache_size = 65536;",
+    "set effective_cache_size = 262144;",
+    "set effective_cache_size = 4194304;"
+  ],
+  [
+    "set maintenance_work_mem = 65536;",
+    "set maintenance_work_mem = 1024;",
+    "set maintenance_work_mem = 32768;",
+    "set maintenance_work_mem = 262144;",
+    "set maintenance_work_mem = 2097152;"
+  ],
+  [
+    "set work_mem = 4096;",
+    "set work_mem = 64;",
+    "set work_mem = 1024;",
+    "set work_mem = 32768;",
+    "set work_mem = 262144;",
+    "set work_mem = 2097152;"
+  ],
+  [
+    "set hash_mem_multiplier = 2;",
+    "set hash_mem_multiplier = 1;",
+    "set hash_mem_multiplier = 10;",
+    "set hash_mem_multiplier = 100;",
+    "set hash_mem_multiplier = 1000;"
+  ],
+  [
+    "set shared_buffers = '128MB';",
+    "set shared_buffers = '1GB';",
+    "set shared_buffers = '4GB';",
+    "set shared_buffers = '8GB';",
+    "set shared_buffers = '32GB';"
+  ],
+  [
+    "set subscriber_fillfactor = 100;",
+    "set subscriber_fillfactor = 10;",
+    "set subscriber_fillfactor = 20;",
+    "set subscriber_fillfactor = 30;",
+    "set subscriber_fillfactor = 40;",
+    "set subscriber_fillfactor = 50;",
+    "set subscriber_fillfactor = 60;",
+    "set subscriber_fillfactor = 70;",
+    "set subscriber_fillfactor = 80;",
+    "set subscriber_fillfactor = 90;"
+  ],
+  [
+    "set access_info_fillfactor = 100;",
+    "set access_info_fillfactor = 10;",
+    "set access_info_fillfactor = 20;",
+    "set access_info_fillfactor = 30;",
+    "set access_info_fillfactor = 40;",
+    "set access_info_fillfactor = 50;",
+    "set access_info_fillfactor = 60;",
+    "set access_info_fillfactor = 70;",
+    "set access_info_fillfactor = 80;",
+    "set access_info_fillfactor = 90;"
+  ],
+  [
+    "set special_facility_fillfactor = 100;",
+    "set special_facility_fillfactor = 10;",
+    "set special_facility_fillfactor = 20;",
+    "set special_facility_fillfactor = 30;",
+    "set special_facility_fillfactor = 40;",
+    "set special_facility_fillfactor = 50;",
+    "set special_facility_fillfactor = 60;",
+    "set special_facility_fillfactor = 70;",
+    "set special_facility_fillfactor = 80;",
+    "set special_facility_fillfactor = 90;"
+  ],
+  [
+    "set call_forwarding_fillfactor = 100;",
+    "set call_forwarding_fillfactor = 10;",
+    "set call_forwarding_fillfactor = 20;",
+    "set call_forwarding_fillfactor = 30;",
+    "set call_forwarding_fillfactor = 40;",
+    "set call_forwarding_fillfactor = 50;",
+    "set call_forwarding_fillfactor = 60;",
+    "set call_forwarding_fillfactor = 70;",
+    "set call_forwarding_fillfactor = 80;",
+    "set call_forwarding_fillfactor = 90;"
+  ]
+]

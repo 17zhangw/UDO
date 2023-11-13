@@ -66,7 +66,10 @@ for query_id, query in queries.items():
     for join_element in join_elements:
         if "AS" not in join_element:
             rename_table_dict[join_element.strip().lower()] = [join_element.strip().lower()]
-        elif join_element[:rename_pos].strip() not in rename_table_dict:
+            continue
+
+        rename_pos = join_element.index("AS")
+        if join_element[:rename_pos].strip() not in rename_table_dict:
             rename_table_dict[join_element[:rename_pos].strip()] = [join_element[rename_pos + 2:].strip()]
         else:
             rename_table_dict[join_element[:rename_pos].strip()].append(join_element[rename_pos + 2:].strip())

@@ -160,7 +160,7 @@ class PostgresDriver(AbstractDriver):
 
                 code, _, _ = local["java"][
                     "-jar", "benchbase.jar",
-                    "-b", "tpcc",
+                    "-b", self.benchmark[0],
                     "-c", self.benchmark[2],
                     "-d", results,
                     "--execute=true"].run(retcode=None)
