@@ -207,7 +207,7 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
                     best_reward = sum(run_time)
 
                 # Log every 15 minutes on each micro-episode.
-                if time.time() - last_log_time >= 15:
+                if time.time() - last_log_time >= (15 * 60):
                     best_hr, best_lr = get_tree_best(heavy_root, light_tree_cache)
                     logging.debug("interval_check: %s", env.print_debug_action_str(list(best_hr), best_lr))
                     last_log_time = time.time()
