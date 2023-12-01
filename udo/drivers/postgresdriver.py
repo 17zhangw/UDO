@@ -46,7 +46,8 @@ class PostgresDriver(AbstractDriver):
 
     def connect(self):
         """connect to a database"""
-        self.conn = psycopg.connect("host=localhost port=5432 dbname='%s' user='%s'" % (self.config["db"], self.config["user"]), autocommit=True, prepare_threshold=None)
+        logging.info("Connecting to host=localhost port=%s dbname='%s' user='%s'" % (self.config["port"], self.config["db"], self.config["user"]))
+        self.conn = psycopg.connect("host=localhost port=%s dbname='%s' user='%s'" % (self.config["port"], self.config["db"], self.config["user"]), autocommit=True, prepare_threshold=None)
         self.cursor = self.conn.cursor()
         self.index_creation_format = "CREATE INDEX %s ON %s (%s);"
         self.index_drop_format = "drop index %s;"
@@ -97,7 +98,7 @@ class PostgresDriver(AbstractDriver):
             # Wait until pg_isready fails.
             retcode, _, _ = local[f"{self.benchmark[3]}/pg_isready"][
                 "--host", "localhost",
-                "--port", "5432",
+                "--port", "{}".format(self.config["port"]),
                 "--dbname", "benchbase"].run(retcode=None)
 
             exists = (Path(self.benchmark[3]) / self.benchmark[4] / "postmaster.pid").exists()
@@ -138,7 +139,7 @@ class PostgresDriver(AbstractDriver):
 
             retcode, _, _ = local[f"{self.benchmark[3]}/pg_isready"][
                 "--host", "localhost",
-                "--port", "5432",
+                "--port", "{}".format(self.config["port"]),
                 "--dbname", "benchbase"].run(retcode=None)
             if retcode == 0:
                 break
@@ -173,7 +174,7 @@ class PostgresDriver(AbstractDriver):
             local["tar"]["xf", f"{self.benchmark[3]}/{self.benchmark[4]}.tgz", "-C", f"{self.benchmark[3]}/{self.benchmark[4]}", "--strip-components", "1"].run()
             self._start()
 
-            self.conn = psycopg.connect("host=localhost port=5432 dbname='%s' user='%s'" % (self.config["db"], self.config["user"]), autocommit=True, prepare_threshold=None)
+            self.conn = psycopg.connect("host=localhost port=%s dbname='%s' user='%s'" % (self.config["port"], self.config["db"], self.config["user"]), autocommit=True, prepare_threshold=None)
             self.cursor = self.conn.cursor()
 
             files = [f for f in Path(results).rglob("*.summary.json")]

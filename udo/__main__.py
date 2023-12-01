@@ -44,6 +44,7 @@ if __name__ == "__main__":
     # database setting
     udo_parser.add_argument('-system', choices=('mysql', 'postgres'),
                             help='Target system driver')
+    udo_parser.add_argument('-port', help="port")
     udo_parser.add_argument('-db', default="tpch",
                             help='the database to optimizes')
     udo_parser.add_argument('-username', default="udo",
@@ -155,6 +156,7 @@ if __name__ == "__main__":
         "db": args['db'],
         "user": args['username'],
         "passwd": args['password'],
+        "port": args['port'],
     }
 
     with open(args['sys_params'], 'rt') as f:
