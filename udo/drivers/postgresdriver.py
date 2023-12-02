@@ -111,13 +111,14 @@ class PostgresDriver(AbstractDriver):
         assert not pid_lock.exists()
 
         attempts = 0
+        port = self.config["port"]
         while not pid_lock.exists():
             # Try starting up.
             retcode, stdout, stderr = local[f"{self.benchmark[3]}/pg_ctl"][
                 "-D", f"{self.benchmark[3]}/{self.benchmark[4]}",
                 "--wait",
                 "-t", "180",
-                "-l", f"{self.benchmark[3]}/{self.benchmark[4]}/pg.log",
+                "-l", f"{self.benchmark[3]}/{self.benchmark[4]}/pg.log.{port}",
                 "start"].run(retcode=None)
 
             if retcode == 0 or pid_lock.exists():
@@ -304,7 +305,7 @@ class PostgresDriver(AbstractDriver):
             "-D", "/mnt/nvme0n1/wz2/noisepage/pgdata",
             "--wait",
             "-t", "180",
-            "-l", "/mnt/nvme0n1/wz2/noisepage/pg.log",
+            "-l", "/mnt/nvme0n1/wz2/noisepage/pg.log.{}".format(self.config["port"]),
             "restart"].run(retcode=None)
 
         # Connect.
