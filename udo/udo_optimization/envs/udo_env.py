@@ -67,10 +67,10 @@ class UDOEnv(gymnasium.Env):
         logging.debug(f"action space {self.nA}")
 
         # state space
-        self.nS_index = int(math.pow(2, self.index_candidate_num))
+        #self.nS_index = int(math.pow(2, self.index_candidate_num))
         self.nS_parameter = np.prod(self.parameter_candidate)
         # self.nS = self.nS_index * self.nS_parameter
-        logging.debug(f"index state space {self.nS_index}")
+        #logging.debug(f"index state space {self.nS_index}")
         logging.debug(f"parameter state space {self.nS_parameter}")
 
         # our transition matrix is a deterministic matrix
@@ -117,29 +117,29 @@ class UDOEnv(gymnasium.Env):
 
     def state_decoder(self, num):
         """decode a vector to a state number"""
-        index_pos = int(num % self.nS_index)
+        index_pos = 0 #int(num % self.nS_index)
         index_state_string = np.binary_repr(int(index_pos), width=self.index_candidate_num)[::-1]
         # index stata represented in string
         index_state = list(map(int, index_state_string))
-        parameter_value = int(num / self.nS_index)
+        parameter_value = 0 #int(num / self.nS_index)
         parameter_pos = [0] * self.parameter_candidate_num
         for i in range(self.parameter_candidate_num):
             parameter_pos[i] = (parameter_value % self.parameter_candidate[i])
             parameter_value = int(parameter_value / self.parameter_candidate[i])
         return index_state + parameter_pos
 
-    def state_encoder(self, state):
-        """encode a state number to a vector"""
-        index_state = state[:self.index_candidate_num]
-        parameter_state = state[self.index_candidate_num:]
-        index_pos = int("".join([str(int(a)) for a in reversed(index_state)]), 2)
-        parameter_pos = 0
-        parameter_base = 1
-        for i in range(len(self.parameter_candidate)):
-            parameter_pos = parameter_pos + parameter_state[i] * parameter_base
-            parameter_base = parameter_base * self.parameter_candidate[i]
-        pos = index_pos + parameter_pos * self.nS_index
-        return int(pos)
+    #def state_encoder(self, state):
+    #    """encode a state number to a vector"""
+    #    index_state = state[:self.index_candidate_num]
+    #    parameter_state = state[self.index_candidate_num:]
+    #    index_pos = int("".join([str(int(a)) for a in reversed(index_state)]), 2)
+    #    parameter_pos = 0
+    #    parameter_base = 1
+    #    for i in range(len(self.parameter_candidate)):
+    #        parameter_pos = parameter_pos + parameter_state[i] * parameter_base
+    #        parameter_base = parameter_base * self.parameter_candidate[i]
+    #    pos = index_pos + parameter_pos * self.nS_index
+    #    return int(pos)
 
     def retrieve_heavy_actions(self, state):
         """obtain available heavy actions given a state"""
@@ -192,7 +192,7 @@ class UDOEnv(gymnasium.Env):
                 parameter_type += 1
             parameter_state[parameter_type] = parameter_value
         next_state = index_state + parameter_state
-        return next_state, self.state_encoder(next_state)
+        return next_state, None #self.state_encoder(next_state)
 
     def step_without_evaluation(self, action):
         """move to the next state given the action and current state"""

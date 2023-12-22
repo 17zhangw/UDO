@@ -98,8 +98,7 @@ class uct_node(mcts_node):
         current_level_state = self.state
         selected_action_path = []
         for current_level in range(self.tree_level + 1, self.tree_height):
-            current_level_state, current_state_id = self.env.transition(current_level_state,
-                                                                        current_level_action)
+            current_level_state, _ = self.env.transition(current_level_state, current_level_action)
             if self.space_type is SpaceType.Light:
                 current_candidate_actions = self.env.retrieve_light_actions(current_level_state)
             elif self.space_type is SpaceType.Heavy:
@@ -125,7 +124,7 @@ class uct_node(mcts_node):
                 return [selected_action]
             can_expand = (self.create_in != round) and (self.tree_level < self.tree_height)
             if can_expand and not self.children[selected_action_idx]:
-                state, state_idx = self.env.transition(self.state, selected_action)
+                state, _ = self.env.transition(self.state, selected_action)
                 self.children[selected_action_idx] = uct_node(round=0, tree_level=self.tree_level + 1,
                                                               tree_height=self.tree_height, state=state, env=self.env,
                                                               space_type=self.space_type,

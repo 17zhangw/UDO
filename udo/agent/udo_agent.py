@@ -39,13 +39,14 @@ def run_udo_agent(driver, queries, candidate_indices, tuning_config):
 
     check_candidate_indices = []
     for ci in candidate_indices:
-        try:
-            driver.build_index(ci)
-            driver.drop_index(ci)
-            check_candidate_indices.append(ci)
-            logging.debug(f"{ci} index has no problem.")
-        except Exception as e:
-            logging.debug(f"Encountered exception {e} for {ci}")
+        check_candidate_indices.append(ci)
+        #try:
+        #    driver.build_index(ci)
+        #    driver.drop_index(ci)
+        #    check_candidate_indices.append(ci)
+        #    logging.debug(f"{ci} index has no problem.")
+        #except Exception as e:
+        #    logging.debug(f"Encountered exception {e} for {ci}")
     candidate_indices = check_candidate_indices
 
     env = gym.make('udo_optimization-v0', driver=driver, queries=queries, candidate_indices=candidate_indices,
